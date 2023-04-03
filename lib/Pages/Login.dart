@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:responsive_ui/responsive_ui.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Pages/Home.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Shared_preference/Preference.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/main.dart';
 
 import '../Admin/Home.dart';
+import '../Api/ApiLogin.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -15,6 +21,33 @@ class _LoginPageState extends State<LoginPage> {
   bool isVisibility = true;
   bool registerClicked = false;
   late bool onHoverLogin = true;
+
+  TextEditingController controllerEmail = TextEditingController();
+  TextEditingController controllerPassword = TextEditingController();
+
+  Login(BuildContext context) {
+    var email = controllerEmail.text; 
+    var password = controllerPassword.text; 
+    if(email == '' || password == '' || email == null || password == null){
+      EasyLoading.showError("Please insert email & password",dismissOnTap: true);
+      return;
+    }
+    var data = {
+      "email" : email,
+      "password" : password
+    };
+    Api.login(data).then((value){
+      if(value.message! == "Email/Password anda salah silahkan coba lagi!"){
+        EasyLoading.showError("Email/Password anda salah silahkan coba lagi!",dismissOnTap: true);
+        return;
+      }
+
+      Pref.userPref(value.data!.id!.toString(), value.data!.name!, value.token!,value.data!.level!);
+      EasyLoading.showSuccess("Welcome ${value.data!.name!}",dismissOnTap: true);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage()));
+      return;
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -65,7 +98,7 @@ class _LoginPageState extends State<LoginPage> {
             margin: EdgeInsets.symmetric(horizontal: deviceWidth(context) * 0.05,vertical: 7),
             child: TextFormField(
               keyboardType: TextInputType.emailAddress,
-              // controller: controllerEmail,
+              controller: controllerEmail,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.all(15),
@@ -100,7 +133,7 @@ class _LoginPageState extends State<LoginPage> {
             margin: EdgeInsets.symmetric(horizontal: deviceWidth(context) * 0.05,vertical: 7),
             child: TextFormField(
               obscureText: isVisibility,
-              // controller: controllerPassword,
+              controller: controllerPassword,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.all(15),
@@ -147,7 +180,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         Center(
           child: TextButton(
-            onPressed: () => null,
+            onPressed: () => Login(context),
             child: Container(
               margin: EdgeInsets.only(top: 25,bottom: 10),
               padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),
@@ -186,17 +219,6 @@ class _LoginPageState extends State<LoginPage> {
                 }),
                 child: Text(
                   "Register",
-                  style: TextStyle(
-                    color: Colors.blueAccent,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () => Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (context) => adminMain())
-                ),
-                child: Text(
-                  "AdminPage",
                   style: TextStyle(
                     color: Colors.blueAccent,
                   ),

@@ -2,6 +2,8 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:responsive_ui/responsive_ui.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/ApiLelang.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Pages/DetailLelang.dart';
 
 import '../ComponentLib/Components.dart';
@@ -122,6 +124,24 @@ class HomePage extends StatefulWidget {
 }
 class _HomePageState extends State<HomePage> {
   final currencyFormatter = NumberFormat('#,000', 'ID');
+  final img_url = "http://lelang.enricko.com/barang_lelang/";
+  List<Data> lelang = [];
+  List<Data> lelangLatest = [];
+  @override
+  void initState() {
+    Api.lelangPage("status=dibuka&top=true&ditawar=true").then((value){
+      setState(() {
+        lelang = value.data!;
+      });
+    });
+    Api.lelangPage("status=dibuka&time=new").then((value){
+      setState(() {
+        lelangLatest = value.data!;
+      });
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -172,14 +192,14 @@ class _HomePageState extends State<HomePage> {
               behavior: MyCustomScrollBehavior(),
               child: ListView.builder(
                 physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
-                itemCount: topList.length,
+                itemCount: lelang.length,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) {
                   return GestureDetector(
                     onTap: () => 
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => DetailLelang())
+                        MaterialPageRoute(builder: (context) => DetailLelang(idLelang: int.parse(lelang[index].idLelang!),))
                       ),
                     child: Card(
                       color: Color.fromARGB(255, 95, 95, 95),
@@ -193,7 +213,7 @@ class _HomePageState extends State<HomePage> {
                                 width: 100,
                                 height: 100,
                                 child: Image.network(
-                                  "${topList[index]}",
+                                  "${img_url + lelang[index].barang!.imageBarang!}",
                                   width: 100,
                                   height: 100,
                                   fit: BoxFit.cover,
@@ -214,14 +234,125 @@ class _HomePageState extends State<HomePage> {
                                 height: 5,
                               ),
                               Text(
-                                capitalizeAllSentence("expensive painting"),
+                                capitalizeAllSentence("${lelang[index].barang!.namaBarang!}"),
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 16,
                                 ),
                               ),
+                              lelang[index].barang!.hargaAkhir! == "" ?
                               Text(
-                                "Rp.${currencyFormatter.format(10293092103)}",
+                                "Rp.${currencyFormatter.format(int.parse(lelang[index].barang!.hargaAwal!))}",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 15,
+                                ),
+                              ):
+                              Text(
+                                "Rp.${currencyFormatter.format(int.parse(lelang[index].barang!.hargaAkhir!))}",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 15,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          Div(
+            divison: Division(
+              colL: 12
+            ),
+            child: Container(
+              margin: EdgeInsets.only(left: 25,top: 15),
+              child: const Text(
+                "Barang Terbaru",
+                textAlign: TextAlign.start,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+          Divider(
+            thickness: 3,
+            indent: 20,
+            endIndent: 20, 
+            color: Colors.black, 
+            height: 20, 
+          ),
+          SizedBox(
+            height: 200,
+            child: ScrollConfiguration(
+              behavior: MyCustomScrollBehavior(),
+              child: ListView.builder(
+                physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                itemCount: lelangLatest.length,
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index) {
+                  return GestureDetector(
+                    onTap: () => 
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => DetailLelang(idLelang:int.parse(lelangLatest[index].idLelang!)))
+                      ),
+                    child: Card(
+                      color: Color.fromARGB(255, 95, 95, 95),
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: SizedBox(
+                          width: 150,
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                width: 100,
+                                height: 100,
+                                child: Image.network(
+                                  "${img_url + lelangLatest[index].barang!.imageBarang!}",
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, loadingProgress){
+                                    if (loadingProgress == null) {
+                                      return child;
+                                    }
+                                    return Image.asset(
+                                      "image/tambahan/image_placeholder.png",
+                                      width: 100,
+                                      height: 100,
+                                      fit: BoxFit.cover,
+                                    );
+                                  },
+                                ),
+                              ),
+                              SizedBox(
+                                height: 5,
+                              ),
+                              Text(
+                                capitalizeAllSentence("${lelangLatest[index].barang!.namaBarang!}"),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                ),
+                              ),
+                              lelangLatest[index].barang!.hargaAkhir! == "" ?
+                              Text(
+                                "Rp.${currencyFormatter.format(int.parse(lelangLatest[index].barang!.hargaAwal!))}",
+                                style: TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 15,
+                                ),
+                              ):
+                              Text(
+                                "Rp.${currencyFormatter.format(int.parse(lelangLatest[index].barang!.hargaAkhir!))}",
                                 style: TextStyle(
                                   color: Colors.white70,
                                   fontSize: 15,

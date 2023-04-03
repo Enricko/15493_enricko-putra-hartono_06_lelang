@@ -148,7 +148,7 @@ class _AuctionPageState extends State<AuctionPage> {
                       onTap: () => 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => DetailLelang())
+                          MaterialPageRoute(builder: (context) => DetailLelang(idLelang: 0,))
                         ),
                       child: Card(
                         color: Color.fromARGB(255, 95, 95, 95),
@@ -297,7 +297,7 @@ class _AuctionPageState extends State<AuctionPage> {
                       onTap: () => 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => DetailLelang())
+                          MaterialPageRoute(builder: (context) => DetailLelang(idLelang: 0,))
                         ),
                       child: Card(
                         color: Color.fromARGB(255, 95, 95, 95),

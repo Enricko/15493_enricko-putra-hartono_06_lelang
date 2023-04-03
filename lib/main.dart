@@ -1,6 +1,8 @@
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Pages/Home.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Pages/Login.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Pages/Profile.dart';
@@ -43,8 +45,27 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<Widget> onTapRouteBar = [AuctionPage(),HomePage(),ProfilePage()];
+  List<Widget> onTapRouteBar = [AuctionPage(),HomePage(),LoginPage()];
   int selectedIndex = 1;
+
+  Future<void> userCheck() async {
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    var token = pref.getString('token');
+    if(token != null || token != ""){
+      Api.getUser(token!).then((value){
+        setState(() {
+          onTapRouteBar = [AuctionPage(),HomePage(),ProfilePage(token:token)];
+        });
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    userCheck();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
