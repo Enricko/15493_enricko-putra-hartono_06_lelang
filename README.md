@@ -8,6 +8,8 @@
 - Kemampuan untuk mengikuti barang lelang.
 - Penampilan riwayat lelang pengguna.
 - Informasi akun pengguna, termasuk riwayat lelang dan barang lelang yang diikuti.
+- Lelang dapat menutup otomatis dalam kurun waktu yang di tentukan 
+
 ### Beberapa apps yang harus di install terlebih dahulu
 
 1.Install [VsCode](https://code.visualstudio.com/download)
