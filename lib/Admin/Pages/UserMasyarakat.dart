@@ -1,6 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/main.dart';
+
+import '../../Api/ApiAllUser.dart';
   
 class UserMasyarakat extends StatefulWidget {
   const UserMasyarakat({super.key});
@@ -8,82 +14,34 @@ class UserMasyarakat extends StatefulWidget {
   @override
   State<UserMasyarakat> createState() => _UserMasyarakatState();
 }
-class Manusia {
-  int id,telp;
-  String nama,email;
-
-  Manusia(
-      this.id,
-      this.nama,
-      this.email,
-      this.telp,
-      );
-}
 
 class _UserMasyarakatState extends State<UserMasyarakat> {
-  // final DataTableSource _data = MyData();
-  List<Manusia> DaftarSiswa=<Manusia>[
-    Manusia(1,"Andi",'email@gamil.com',18),
-    Manusia(2,"Budi",'email@gamil.com',24),
-    Manusia(3,"Cita",'email@gamil.com',12),
-    Manusia(4,"Dito",'email@gamil.com',15),
-    Manusia(5,"Echo",'email@gamil.com',17),
-    Manusia(6,"Frenki",'email@gamil.com',24),
-    Manusia(1,"Andi",'email@gamil.com',18),
-    Manusia(2,"Budi",'email@gamil.com',24),
-    Manusia(3,"Cita",'email@gamil.com',12),
-    Manusia(4,"Dito",'email@gamil.com',15),
-    Manusia(1,"Andi",'email@gamil.com',18),
-    Manusia(2,"Budi",'email@gamil.com',24),
-    Manusia(3,"Cita",'email@gamil.com',12),
-    Manusia(4,"Dito",'email@gamil.com',15),
-    Manusia(5,"Echo",'email@gamil.com',17),
-    Manusia(6,"Frenki",'email@gamil.com',24),
-    Manusia(1,"Andi",'email@gamil.com',18),
-    Manusia(2,"Budi",'email@gamil.com',24),
-    Manusia(3,"Cita",'email@gamil.com',12),
-    Manusia(4,"Dito",'email@gamil.com',15),
-    Manusia(1,"Andi",'email@gamil.com',18),
-    Manusia(2,"Budi",'email@gamil.com',24),
-    Manusia(3,"Cita",'email@gamil.com',12),
-    Manusia(4,"Dito",'email@gamil.com',15),
-    Manusia(5,"Echo",'email@gamil.com',17),
-    Manusia(6,"Frenki",'email@gamil.com',24),
-    Manusia(1,"Andi",'email@gamil.com',18),
-    Manusia(2,"Budi",'email@gamil.com',24),
-    Manusia(3,"Cita",'email@gamil.com',12),
-    Manusia(4,"Dito",'email@gamil.com',15),
-    Manusia(1,"Andi",'email@gamil.com',18),
-    Manusia(2,"Budi",'email@gamil.com',24),
-    Manusia(3,"Cita",'email@gamil.com',12),
-    Manusia(4,"Dito",'email@gamil.com',15),
-    Manusia(5,"Echo",'email@gamil.com',17),
-    Manusia(6,"Frenki",'email@gamil.com',24),
-    Manusia(1,"Andi",'email@gamil.com',18),
-    Manusia(2,"Budi",'email@gamil.com',24),
-    Manusia(3,"Cita",'email@gamil.com',12),
-    Manusia(4,"Dito",'email@gamil.com',15),
-    Manusia(5,"Echo",'email@gamil.com',17),
-    Manusia(6,"Frenki",'email@gamil.com',24),
-    Manusia(1,"Andi",'email@gamil.com',18),
-    Manusia(2,"Budi",'email@gamil.com',24),
-    Manusia(3,"Cita",'email@gamil.com',12),
-    Manusia(4,"Dito",'email@gamil.com',15),
-    Manusia(5,"Echo",'email@gamil.com',17),
-    Manusia(6,"Frenki",'email@gamil.com',24),
-    Manusia(6,"Frenki",'email@gamil.com',24),
-  ];
+  Future<ApiAllUser>? masyarakat;
+  String? level;
+  String? idUser;
+  String? token;
+
+  Future<void> userCheck()async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      level = pref.getString('level');
+      token = pref.getString('token');
+      idUser = pref.getString('id');
+    });
+    if(token == null || token == ""){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(page:2)));
+      EasyLoading.showError("Please login First",dismissOnTap: true);
+      return;
+    }
+    masyarakat = Api.getAllUser(token!, "level=masyarakat");
+  }
 
   @override
   void initState() {
+    userCheck();
     super.initState();
   }
 
-  refreshList() {
-    setState(() {
-      DaftarSiswa=DaftarSiswa;
-    });
-  }
 
   int perPageSelected = 10;
   // int perPageSelectedOnChange = 10;
@@ -103,75 +61,86 @@ class _UserMasyarakatState extends State<UserMasyarakat> {
             ),
           ),
           SingleChildScrollView(
-            child: PaginatedDataTable(
-              arrowHeadColor: Colors.white,
-              header: Text("Table User Masyarakat"),
-              onRowsPerPageChanged: (perPage) {
-                setState(() {
-                  perPageSelected = perPage!;
-                  // perPageSelectedOnChange = perPage;
-                });
+            child: FutureBuilder(
+              future: masyarakat,
+              builder: (context,AsyncSnapshot<ApiAllUser> snapshot){
+                if(snapshot.hasData){
+                  if (snapshot.data!.count! == 0) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment:MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('Data Masyarakat Kosong'),
+                        ],
+                      ),
+                    );
+                  }
+                  return TableMasyarakat(snapshot.data!.data!);
+                }
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting: return Center(child: CircularProgressIndicator());
+                  default:
+                    if (snapshot.hasError)
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    else
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment:MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('if you stuck here press back'),
+                          ElevatedButton(onPressed: (){
+                            Navigator.pop(context);
+                          }, 
+                          child: Text('< Back'))
+                        ],
+                      ),
+                    );
+                }
               },
-              // onPageChanged: (int? n){
-              //   setState(() {
-              //     if (DaftarSiswa.length - n! < perPageSelected) {
-              //       if (DaftarSiswa.length - n < 10) {
-              //         perPageSelected = 10;
-              //       }else if(DaftarSiswa.length - n < 20){
-              //         perPageSelected = 20;
-              //       }else if(DaftarSiswa.length - n < 50){
-              //         perPageSelected = 50;
-              //       }else if(DaftarSiswa.length - n < 100){
-              //         perPageSelected = 100;
-              //       }
-              //     }else{
-              //       perPageSelected = perPageSelectedOnChange;
-              //     }
-              //   });
-              // },
-              rowsPerPage: perPageSelected,
-              columns: <DataColumn>[
-                DataColumn(
-                  label: Text('No'),
-                ),
-                DataColumn(
-                  label: Text('ID'),
-                ),
-                DataColumn(
-                  label: Text('Name'),
-                ),
-                DataColumn(
-                  label: Text('Email'),
-                ),
-                DataColumn(
-                  label: Text('Telp'),
-                ),
-              ],
-              source: MyData(userData: DaftarSiswa),
             ),
           ),
-          // SizedBox(
-          //   width: double.infinity,
-          //   child: Center(
-          //     child: 
-          //   ),
-          // ),
         ],
       ),
     );
   }
+
+  PaginatedDataTable TableMasyarakat(List<Data> list) {
+    return PaginatedDataTable(
+      arrowHeadColor: Colors.white,
+      header: Text("Table User Masyarakat"),
+      onRowsPerPageChanged: (perPage) {
+        setState(() {
+          perPageSelected = perPage!;
+          // perPageSelectedOnChange = perPage;
+        });
+      },
+      rowsPerPage: perPageSelected,
+      columns: <DataColumn>[
+        DataColumn(
+          label: Text('No'),
+        ),
+        DataColumn(
+          label: Text('ID'),
+        ),
+        DataColumn(
+          label: Text('Name'),
+        ),
+        DataColumn(
+          label: Text('Email'),
+        ),
+        DataColumn(
+          label: Text('Telp'),
+        ),
+      ],
+      source: MyData(userData: list),
+    );
+  }
 }
 class MyData extends DataTableSource {
-  // final List<Map<String, dynamic>> _data = List.generate(
-  //     123,
-  //     (index) => {
-  //           "id": index * 3,
-  //           "name": "Enricko",
-  //           "email": "Enricko@gmail.com",
-  //           "price": Random().nextInt(10000)
-  //         });
   MyData({required this.userData});
-  final List<Manusia> userData;
+  final List<Data> userData;
   @override
   DataRow? getRow(int index) {
     if(index >= userData.length){
@@ -181,8 +150,8 @@ class MyData extends DataTableSource {
     return DataRow(cells: [
       DataCell(Text("${index + 1}")),
       DataCell(Text(user.id.toString())),
-      DataCell(Text(user.nama)),
-      DataCell(Text(user.email)),
+      DataCell(Text(user.name!)),
+      DataCell(Text(user.email!)),
       DataCell(Text(user.telp.toString())),
     ]);
   }

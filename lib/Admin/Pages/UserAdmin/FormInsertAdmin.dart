@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:select_form_field/select_form_field.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Home.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/main.dart';
 
 class FormInsertAdmin extends StatefulWidget {
   const FormInsertAdmin({super.key});
@@ -18,6 +23,70 @@ class _FormInsertAdminState extends State<FormInsertAdmin> {
       'value': 'Administrasi',
     },
   ];
+  
+  String? level;
+  String? idUser;
+  String? token;
+  
+  TextEditingController controllerName = TextEditingController();
+  TextEditingController controllerLevel = TextEditingController();
+  TextEditingController controllerEmail = TextEditingController();
+  TextEditingController controllerPassword = TextEditingController();
+  TextEditingController controllerPasswordConfirm = TextEditingController();
+
+  Future<void> userCheck()async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      level = pref.getString('level');
+      token = pref.getString('token');
+      idUser = pref.getString('id');
+    });
+    if(token == null || token == ""){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(page:2)));
+      EasyLoading.showError("Please login First",dismissOnTap: true);
+      return;
+    }
+  }
+  register(BuildContext context){
+    var name = controllerName.text;
+    var level = controllerLevel.text;
+    var email = controllerEmail.text; 
+    var password = controllerPassword.text; 
+    var passwordConfirm = controllerPasswordConfirm.text; 
+    if(name == '' || level == '' || email == '' || password == '' || passwordConfirm == '' || 
+      name == null || level == null || email == null || password == null || passwordConfirm == null){
+      EasyLoading.showError("Please insert all form input",dismissOnTap: true);
+      return;
+    }
+    if (password != passwordConfirm) {
+      EasyLoading.showError("Password confirm doesnt match",dismissOnTap: true);
+      return;
+    }
+    var data = {
+      "name" : name,
+      "email" : email,
+      "level" : level,
+      "password": password,
+      'password_confirmation' : passwordConfirm,
+    };
+    Api.registerAdmin(token!,data).then((value){
+      if (value.message! != "Selamat datang") {
+        EasyLoading.showError("Email telah terpakai",dismissOnTap: true);
+        return;
+      }
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => adminMain(page:2)));
+      EasyLoading.showSuccess("Data Telah di tambahkan",dismissOnTap: true);
+      return;
+    });
+
+  }
+
+  @override
+  void initState() {
+    userCheck();
+    super.initState();
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -39,7 +108,7 @@ class _FormInsertAdminState extends State<FormInsertAdmin> {
                 margin: EdgeInsets.symmetric(vertical: 7),
                 child: TextFormField(
                   keyboardType: TextInputType.name,
-                  // controller: controllerName,
+                  controller: controllerName,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(15),
@@ -70,6 +139,7 @@ class _FormInsertAdminState extends State<FormInsertAdmin> {
                 child: Container(
                   margin: EdgeInsets.symmetric(vertical: 7),
                   child: SelectFormField(
+                    controller: controllerLevel,
                     type: SelectFormFieldType.dropdown,
                     items: _items,
                     style: TextStyle(
@@ -105,7 +175,7 @@ class _FormInsertAdminState extends State<FormInsertAdmin> {
                 margin: EdgeInsets.symmetric(vertical: 7),
                 child: TextFormField(
                   keyboardType: TextInputType.emailAddress,
-                  // controller: controllerEmail,
+                  controller: controllerEmail,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(15),
@@ -135,7 +205,7 @@ class _FormInsertAdminState extends State<FormInsertAdmin> {
                 margin: EdgeInsets.symmetric(vertical: 7),
                 child: TextFormField(
                   obscureText: isVisibility,
-                  // controller: controllerEmail,
+                  controller: controllerPassword,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(15),
@@ -175,7 +245,7 @@ class _FormInsertAdminState extends State<FormInsertAdmin> {
                 margin: EdgeInsets.symmetric(vertical: 7),
                 child: TextFormField(
                   obscureText: true,
-                  // controller: controllerEmail,
+                  controller: controllerPasswordConfirm,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(15),
@@ -204,7 +274,7 @@ class _FormInsertAdminState extends State<FormInsertAdmin> {
               Container(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => null,
+                  onPressed: () => register(context),
                   child: Container(
                     margin: EdgeInsets.symmetric(vertical: 10),
                     padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),

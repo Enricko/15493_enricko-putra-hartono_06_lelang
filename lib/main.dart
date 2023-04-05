@@ -46,6 +46,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<Widget> onTapRouteBar = [AuctionPage(),HomePage(),LoginPage()];
+
   int selectedIndex = 1;
 
   Future<void> userCheck() async {
@@ -64,6 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     userCheck();
+    selectedIndex = widget.page;
   }
 
   @override
@@ -78,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
         child: onTapRouteBar[selectedIndex]
       ),
       bottomNavigationBar: ConvexAppBar(
-        initialActiveIndex: 1,
+        initialActiveIndex: selectedIndex,
         items: const [
           TabItem(icon: Icons.account_balance, title: 'Auction'),
           TabItem(icon: Icons.home, title: 'Home'),

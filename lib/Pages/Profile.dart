@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Home.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Api/ApiUser.dart';
@@ -17,14 +18,35 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
 
   Future<ApiUser>? DataUser;
+  String? level;
+  String? idUser;
+  String? token;
+  String? menangCount;
+  String? lelangIkut;
 
   Future<void> userCheck()async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      level = pref.getString('level');
+      token = pref.getString('token');
+      idUser = pref.getString('id');
+    });
     if(widget.token == null || widget.token == ""){
       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(page:2)));
       EasyLoading.showError("Please login First",dismissOnTap: true);
       return;
     }
     DataUser = Api.getUser(widget.token);
+    Api.lelangPage("status=ditutup&user_id=${idUser}").then((value){
+      setState(() {
+        menangCount = value.count!.toString();
+      });
+    });
+    Api.ikutLelang("",token!).then((value){
+      setState(() {
+        lelangIkut = value.count!.toString();
+      });
+    });
   }
 
   Future<void> Logout(BuildContext context)async {
@@ -48,9 +70,26 @@ class _ProfilePageState extends State<ProfilePage> {
         if(snapshot.hasData){
           return UserProfile(context,snapshot.data!.data!);
         }
-        return Center(
-          child: CircularProgressIndicator(),
-        );
+        switch (snapshot.connectionState) {
+          case ConnectionState.waiting: return Center(child: CircularProgressIndicator());
+          default:
+            if (snapshot.hasError)
+              return Center(child: Text('Error: ${snapshot.error}'));
+            else
+            return Center(
+              child: Column(
+                mainAxisAlignment:MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text('if you stuck here press back'),
+                  ElevatedButton(onPressed: (){
+                    Navigator.pop(context);
+                  }, 
+                  child: Text('< Back'))
+                ],
+              ),
+            );
+        }
       },
     );
   }
@@ -110,7 +149,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               SizedBox(height: 3),
                               Text(
-                                '2',
+                                "${menangCount}",
                                 style: TextStyle(
                                   color: Color.fromARGB(255, 236, 229, 229),
                                 ),
@@ -129,7 +168,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               ),
                               SizedBox(height: 3),
                               Text(
-                                '1',
+                                '${lelangIkut}',
                                 style: TextStyle(
                                   color: Color.fromARGB(255, 236, 229, 229),
                                 ),
@@ -170,7 +209,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => ViewAll(page: 'Lelang yang telah kamu menangi'))
+                      MaterialPageRoute(builder: (context) => ViewAll(title: 'Lelang yang telah kamu menangi',page:1,id: idUser!,))
                     ),
                     child: Container(
                       padding: EdgeInsets.all(10),
@@ -189,7 +228,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
                     onTap: () => Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => ViewAll(page: 'Lelang yang telah kamu ikuti'))
+                      MaterialPageRoute(builder: (context) => ViewAll(title: 'Lelang yang telah kamu ikuti',page:1,id: idUser!,token: token!,))
                     ),
                     child: Container(
                       padding: EdgeInsets.all(10),
@@ -214,7 +253,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 //         margin: EdgeInsets.all(10),
                 //         child: GestureDetector(
                 //           onTap: () => Navigator.push(context,
-                //               MaterialPageRoute(builder: (context) => ViewAll(page: 'Tawaran saat ini'))
+                //               MaterialPageRoute(builder: (context) => ViewAll(title: 'Tawaran saat ini'))
                 //           ),
                 //           child: Container(
                 //             padding: EdgeInsets.all(10),
@@ -247,6 +286,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 //     ],
                 //   ),
                 // ),
+                level == 'masyarakat' ? Container() :
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(

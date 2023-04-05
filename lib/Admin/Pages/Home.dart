@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:responsive_ui/responsive_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/LaporanPrint.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/main.dart';
 
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
@@ -9,6 +14,49 @@ class AdminHome extends StatefulWidget {
 }
 
 class _AdminHomeState extends State<AdminHome> {
+  String? tokens;
+  int countAllBarang = 0;
+  int countSedangDijual = 0;
+  int countTelahDijual = 0;
+  int userMas = 0;
+  Future<void> userCheck()async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      tokens = pref.getString('token');
+    });
+    if(tokens == null || tokens == ""){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(page:2)));
+      EasyLoading.showError("Please login First",dismissOnTap: true);
+      return;
+    }
+    Api.getAllUser(tokens!,'?level=masyarakat').then((value){
+      setState(() {
+        userMas = value.count!;
+      });
+    });
+  }
+  
+  @override
+  void initState() {
+    userCheck();
+    Api.lelangPage('status=dibuka').then((value){
+      setState(() {
+        countSedangDijual = value.count!;
+      });
+    });
+    Api.lelangPage('status=ditutup').then((value){
+      setState(() {
+        countTelahDijual = value.count!;
+      });
+    });
+    Api.lelangPage('').then((value){
+      setState(() {
+        countAllBarang = value.count!;
+      });
+    });
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -53,7 +101,7 @@ class _AdminHomeState extends State<AdminHome> {
                     ),
                     SizedBox(height: 10,),
                     Text(
-                      '12312',
+                      '$countAllBarang',
                     ),
                   ],
                 )
@@ -99,7 +147,7 @@ class _AdminHomeState extends State<AdminHome> {
                     ),
                     SizedBox(height: 10,),
                     Text(
-                      '12312',
+                      '$countSedangDijual',
                     ),
                   ],
                 )
@@ -145,7 +193,7 @@ class _AdminHomeState extends State<AdminHome> {
                     ),
                     SizedBox(height: 10,),
                     Text(
-                      '12312',
+                      '$countTelahDijual',
                     ),
                   ],
                 )
@@ -195,11 +243,40 @@ class _AdminHomeState extends State<AdminHome> {
                     ),
                     SizedBox(height: 10,),
                     Text(
-                      '12312',
+                      '$userMas',
                     ),
                   ],
-                )
+                ),
                ],
+              ),
+            ),
+          ),
+          SizedBox(
+            height: 25,
+          ),
+          Center(
+            child: MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: ()=>
+                  Navigator.pushReplacement(context,
+                    MaterialPageRoute(builder: (context) => LaporanPrint(token: tokens!))
+                ),
+                  // MaterialPageRoute(builder: (context) => LaporanPrint())),
+                child: Container(
+                  padding: EdgeInsets.symmetric(vertical: 10,horizontal: 20),
+                  decoration: BoxDecoration(
+                    color: Colors.blueAccent,
+                    borderRadius: BorderRadius.circular(15)
+                  ),
+                  child: Text(
+                    'Laporan',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),

@@ -1,5 +1,7 @@
 import  'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:responsive_ui/responsive_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/Lelang/FormInsertLelang.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/Lelang/HistoryLelang.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/Lelang/LelangTutup.dart';
@@ -9,32 +11,60 @@ import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/UserMasyarakat.dart'
 import 'package:tampilan_lelang_ukk_jan_29_2023/Pages/Home.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/main.dart';
 
+import '../Shared_preference/Preference.dart';
 import 'Pages/Home.dart';
 import 'Pages/UserAdmin/UserAdmin.dart';
 
 class adminMain extends StatefulWidget {
-  const adminMain({super.key,this.page = 0});
+  const adminMain({super.key,this.page = 0,this.idLelang = 0});
   final int page;
+  final int idLelang;
 
   @override
   State<adminMain> createState() => _adminMainState();
 }
 
 class _adminMainState extends State<adminMain> {
-  List<Widget> Pages = [
-    AdminHome(),
-    UserMasyarakat(),
-    UserAdmin(),
-    FormInsertAdmin(),
-    LelangIndex(),
-    LelangTutup(),
-    HistoryLelang(),
-    FormInsertLelang(),
-  ];
+  List<Widget> Pages = [];
+  String? name;
+  String? level;
+
+  Future<void> userCheck()async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    var token = pref.getString('token');
+    setState(() {
+      name = pref.getString("name");
+      level = pref.getString("level");
+    });
+    if(token == null || token == ""){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(page:2)));
+      EasyLoading.showError("Please login First",dismissOnTap: true);
+      return;
+    }
+  }
+
+  Future<void> Logout(BuildContext context)async {
+    Pref.logoutPref();
+    EasyLoading.showSuccess("Logout Success",dismissOnTap: true);
+    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const MyHomePage(page:2)));
+    return;
+  }
+
   late int selectedIndex;
   @override
   void initState() {
+    userCheck();
     selectedIndex = widget.page == 0 ? 0 : widget.page;
+    Pages = [
+      AdminHome(),
+      UserMasyarakat(),
+      UserAdmin(),
+      FormInsertAdmin(),
+      LelangIndex(),
+      LelangTutup(),
+      HistoryLelang(idLelang:widget.idLelang),
+      FormInsertLelang(),
+    ];
     super.initState();
   }
   @override
@@ -73,7 +103,7 @@ class _adminMainState extends State<adminMain> {
                           height: 15,
                         ),
                         Text(
-                          'Administrasi',
+                          '$name',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 20
@@ -122,6 +152,7 @@ class _adminMainState extends State<adminMain> {
                 ),
                 onTap: () => onItemTapped(0),
               ),
+              level! == "administrasi" ?
               Container(
                 margin: EdgeInsets.only(left: 15,top: 15,bottom: 10),
                 child: Text(
@@ -131,7 +162,8 @@ class _adminMainState extends State<adminMain> {
                     fontSize: 14
                   ),
                 ),
-              ),
+              ): Container(),
+              level! == "administrasi" ?
               ListTile(
                 selectedColor: Colors.blueGrey,
                 hoverColor: Colors.blueGrey,
@@ -154,7 +186,8 @@ class _adminMainState extends State<adminMain> {
                   ),
                 ),
                 onTap: () => onItemTapped(1),
-              ),
+              ): Container(),
+              level! == "administrasi" ?
               ListTile(
                 selectedColor: Colors.blueGrey,
                 hoverColor: Colors.blueGrey,
@@ -177,7 +210,7 @@ class _adminMainState extends State<adminMain> {
                   ),
                 ),
                 onTap: () => onItemTapped(2),
-              ),
+              ): Container(),
               Container(
                 margin: EdgeInsets.only(left: 15,top: 15,bottom: 10),
                 child: Text(
@@ -264,9 +297,12 @@ class _adminMainState extends State<adminMain> {
                     ],
                   ),
                 ),
-                onTap: () => Navigator.pushReplacement(context, 
-                  MaterialPageRoute(builder: (context) => MyHomePage(),)
-                ),
+                onTap: (){
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                  Navigator.pushReplacement(context, 
+                    MaterialPageRoute(builder: (context) => MyHomePage()));
+                } 
               ),
               ListTile(
                 selectedColor: Colors.blueGrey,
@@ -288,7 +324,7 @@ class _adminMainState extends State<adminMain> {
                     ],
                   ),
                 ),
-                onTap: () => null,
+                onTap: () => Logout(context),
               ),
             ],
           ),

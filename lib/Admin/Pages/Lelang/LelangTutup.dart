@@ -1,8 +1,12 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Home.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/ApiLelang.dart';
   
 class LelangTutup extends StatefulWidget {
   const LelangTutup({super.key});
@@ -10,39 +14,32 @@ class LelangTutup extends StatefulWidget {
   @override
   State<LelangTutup> createState() => _LelangTutupState();
 }
-class Manusia {
-  DateTime buka,tutup;
-  int harga_awal,id_user,id_petugas;
-  String image,nama_barang;
-
-  Manusia(
-      this.image,
-      this.nama_barang,
-      this.buka,
-      this.tutup,
-      this.harga_awal,
-      this.id_user,
-      this.id_petugas,
-      );
-}
 
 class _LelangTutupState extends State<LelangTutup> {
-  // final DataTableSource _data = MyData();
-  List<Manusia> DaftarSiswa=<Manusia>[
-    Manusia('image/lelang/palu.jpeg','Item',DateTime.now(),DateTime.now(),10000,10,1),
-    Manusia('image/lelang/palu.jpeg','Item',DateTime.now(),DateTime.now(),10000,10,1),
-    Manusia('image/lelang/palu.jpeg','Item',DateTime.now(),DateTime.now(),10000,10,1),
-  ];
+  Future<ApiLelang>? lelang;
+  String? level;
+  String? idUser;
+  String? token;
+
+  Future<void> userCheck()async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    setState(() {
+      level = pref.getString('level');
+      token = pref.getString('token');
+      idUser = pref.getString('id');
+    });
+    if(token == null || token == ""){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => adminMain(page:2)));
+      EasyLoading.showError("Please login First",dismissOnTap: true);
+      return;
+    }
+    lelang = Api.lelang(token!, "status=ditutup");
+  }
 
   @override
   void initState() {
+    userCheck();
     super.initState();
-  }
-
-  refreshList() {
-    setState(() {
-      DaftarSiswa=DaftarSiswa;
-    });
   }
 
   int perPageSelected = 10;
@@ -53,7 +50,7 @@ class _LelangTutupState extends State<LelangTutup> {
       child: Column(
         children: [
           Container(
-            margin: EdgeInsets.only(top: 15,bottom: 25),
+            margin: EdgeInsets.only(top: 15,bottom: 10),
             child: Text(
               'Table Lelang Ditutup',
               style: TextStyle(
@@ -62,75 +59,127 @@ class _LelangTutupState extends State<LelangTutup> {
             ),
           ),
           SingleChildScrollView(
-            child: PaginatedDataTable(
-              arrowHeadColor: Colors.white,
-              dataRowHeight: 100,
-              header: Text("Table Lelang Ditutup"),
-              onRowsPerPageChanged: (perPage) {
-                setState(() {
-                  perPageSelected = perPage!;
-                });
+            child: FutureBuilder(
+              future: lelang,
+              builder: (context,AsyncSnapshot<ApiLelang> snapshot){
+                if(snapshot.hasData){
+                  if (snapshot.data!.count! == 0) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment:MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('Data Lelang Kosong'),
+                        ],
+                      ),
+                    );
+                  }
+                  return TableLelang(snapshot.data!.data!,context);
+                }
+                switch (snapshot.connectionState) {
+                  case ConnectionState.waiting: return Center(child: CircularProgressIndicator());
+                  default:
+                    if (snapshot.hasError)
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    else
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment:MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text('if you stuck here press back'),
+                          ElevatedButton(onPressed: (){
+                            Navigator.pop(context);
+                          }, 
+                          child: Text('< Back'))
+                        ],
+                      ),
+                    );
+                }
               },
-              rowsPerPage: perPageSelected,
-              columns: <DataColumn>[
-                DataColumn(
-                  label: Text('No'),
-                ),
-                DataColumn(
-                  label: Text('Image'),
-                ),
-                DataColumn(
-                  label: Text('Nama Barang'),
-                ),
-                DataColumn(
-                  label: Text('Tanggal Dibuka'),
-                ),
-                DataColumn(
-                  label: Text('Tanggal Ditutup'),
-                ),
-                DataColumn(
-                  label: Text('Harga Awal'),
-                ),
-                DataColumn(
-                  label: Text('Harga Tertinggi'),
-                ),
-                DataColumn(
-                  label: Text('Penanggung Jawab'),
-                ),
-                DataColumn(
-                  label: Text('History Lelang'),
-                ),
-              ],
-              source: MyData(userData: DaftarSiswa, context: context),
             ),
           ),
         ],
       ),
     );
   }
+
+  PaginatedDataTable TableLelang(List<Data> list, BuildContext context) {
+    return PaginatedDataTable(
+      arrowHeadColor: Colors.white,
+      dataRowHeight: 100,
+      header: Text("Table Lelang Ditutup"),
+      onRowsPerPageChanged: (perPage) {
+        setState(() {
+          perPageSelected = perPage!;
+        });
+      },
+      rowsPerPage: perPageSelected,
+      columns: <DataColumn>[
+        DataColumn(
+          label: Text('No'),
+        ),
+        DataColumn(
+          label: Text('Image'),
+        ),
+        DataColumn(
+          label: Text('Nama Barang'),
+        ),
+        DataColumn(
+          label: Text('Tanggal Dibuka'),
+        ),
+        DataColumn(
+          label: Text('Tanggal Ditutup'),
+        ),
+        DataColumn(
+          label: Text('Harga Awal'),
+        ),
+        DataColumn(
+          label: Text('Harga Tertinggi'),
+        ),
+        DataColumn(
+          label: Text('Penanggung Jawab'),
+        ),
+        DataColumn(
+          label: Text('History Lelang'),
+        ),
+      ],
+      source: MyData(DataList: list, context: context),
+    );
+  }
 }
 class MyData extends DataTableSource {
-  MyData({required this.context,required this.userData});
+  MyData({required this.context,required this.DataList});
   final BuildContext context;
-  final List<Manusia> userData;
+  final List<Data> DataList;
+  
+  final img_url = "http://lelang.enricko.com/barang_lelang/";
+  
+  final currencyFormatter = NumberFormat('#,000', 'ID');
   @override
   DataRow? getRow(int index) {
-    if(index >= userData.length){
+    if(index >= DataList.length){
       return null;
     }
-    final user = userData[index];
+    final lelang = DataList[index];
     return DataRow(cells: [
       DataCell(Text("${index + 1}")),
-      DataCell(Image.asset(
-        '${user.image}',
+      DataCell(Image.network(
+        '${img_url + lelang.barang!.imageBarang!}',
         height: 75,
         width: 100,
         fit: BoxFit.cover,
       )),
-      DataCell(Text("${user.nama_barang}")),
-      DataCell(Text("${DateFormat("EEEE, yyyy-MM-dd HH:mm:ss").format(user.buka)}")),
-      DataCell(Text("${DateFormat("EEEE, yyyy-MM-dd HH:mm:ss").format(user.buka)}")),
-      DataCell(Text("${user.harga_awal}")),
+      DataCell(Text("${lelang.barang!.namaBarang!}")),
+      DataCell(Text("${lelang.tglDibuka!}")),
+      DataCell(Text("${lelang.tglDitutup!}")),
+      DataCell(Text("${lelang.barang!.hargaAwal!}")),
+      lelang.user!.id! == "" ? 
+      DataCell(
+        Container(
+          child: Text("Barang tidak laku"),
+        ),
+      ):
       DataCell(Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -143,8 +192,8 @@ class MyData extends DataTableSource {
               width: 50,
             ),
           ),
-          Text("Imam"),
-          Text("Rp.100.012"),
+          Text("${lelang.user!.name!}"),
+          Text("Rp.${currencyFormatter.format(int.parse(lelang.barang!.hargaAkhir!))}"),
         ],
       )),
       DataCell(Column(
@@ -159,13 +208,13 @@ class MyData extends DataTableSource {
               width: 75,
             ),
           ),
-          Text("Admin"),
+          Text("${lelang.idPetugas!}"),
         ],
       )),
       DataCell(
         TextButton(
           onPressed: () => Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => adminMain(page:6))
+            MaterialPageRoute(builder: (context) => adminMain(page:6,idLelang:int.parse(lelang.idLelang!)))
           ),
           child: Container(
             margin: EdgeInsets.symmetric(vertical: 10),
@@ -190,7 +239,7 @@ class MyData extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get rowCount => userData.length;
+  int get rowCount => DataList.length;
 
   @override
   int get selectedRowCount => 0;

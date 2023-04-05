@@ -22,8 +22,11 @@ class _LoginPageState extends State<LoginPage> {
   bool registerClicked = false;
   late bool onHoverLogin = true;
 
+  TextEditingController controllerName = TextEditingController();
+  TextEditingController controllerNoTelp = TextEditingController();
   TextEditingController controllerEmail = TextEditingController();
   TextEditingController controllerPassword = TextEditingController();
+  TextEditingController controllerPasswordConfirm = TextEditingController();
 
   Login(BuildContext context) {
     var email = controllerEmail.text; 
@@ -44,9 +47,44 @@ class _LoginPageState extends State<LoginPage> {
 
       Pref.userPref(value.data!.id!.toString(), value.data!.name!, value.token!,value.data!.level!);
       EasyLoading.showSuccess("Welcome ${value.data!.name!}",dismissOnTap: true);
-      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage()));
+      if(value.data!.level! == "masyarakat"){
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage()));
+      }else{
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => adminMain()));
+      }
       return;
     });
+  }
+
+  register(BuildContext context){
+    var name = controllerName.text;
+    var noTelp = controllerNoTelp.text;
+    var email = controllerEmail.text; 
+    var password = controllerPassword.text; 
+    var passwordConfirm = controllerPasswordConfirm.text; 
+    if(name == '' || noTelp == '' || email == '' || password == '' || passwordConfirm == '' || 
+      name == null || noTelp == null || email == null || password == null || passwordConfirm == null){
+      EasyLoading.showError("Please insert all form input",dismissOnTap: true);
+      return;
+    }
+    if (password != passwordConfirm) {
+      EasyLoading.showError("Password confirm doesnt match",dismissOnTap: true);
+      return;
+    }
+    var data = {
+      "name" : name,
+      "email" : email,
+      "telp" : noTelp,
+      "password": password,
+      'password_confirmation' : passwordConfirm,
+    };
+    Api.register(data).then((value){
+      if (value.message! != "Selamat datang") {
+        EasyLoading.showError("Email/NoTelp telah terpakai",dismissOnTap: true);
+        return;
+      }
+    });
+
   }
   @override
   Widget build(BuildContext context) {
@@ -264,7 +302,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Container(
             margin: EdgeInsets.symmetric(horizontal: deviceWidth(context) * 0.05,vertical: 7),
             child: TextFormField(
-              // controller: controllerName,
+              controller: controllerName,
               keyboardType: TextInputType.name,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
@@ -299,7 +337,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Container(
             margin: EdgeInsets.symmetric(horizontal: deviceWidth(context) * 0.05,vertical: 7),
             child: TextFormField(
-              // controller: controllerNoTelp,
+              controller: controllerNoTelp,
               keyboardType: TextInputType.phone,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
@@ -334,7 +372,7 @@ class _LoginPageState extends State<LoginPage> {
           child: Container(
             margin: EdgeInsets.symmetric(horizontal: deviceWidth(context) * 0.05,vertical: 7),
             child: TextFormField(
-              // controller: controllerEmail,
+              controller: controllerEmail,
               keyboardType: TextInputType.emailAddress,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
@@ -370,7 +408,7 @@ class _LoginPageState extends State<LoginPage> {
             margin: EdgeInsets.symmetric(horizontal: deviceWidth(context) * 0.05,vertical: 7),
             child: TextFormField(
               obscureText: isVisibility,
-              // controller: controllerEmail,
+              controller: controllerPassword,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.all(15),
@@ -415,7 +453,7 @@ class _LoginPageState extends State<LoginPage> {
             margin: EdgeInsets.symmetric(horizontal: deviceWidth(context) * 0.05,vertical: 7),
             child: TextFormField(
               obscureText: true,
-              // controller: controllerPasswordConfirm,
+              controller: controllerPasswordConfirm,
               style: TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 contentPadding: const EdgeInsets.all(15),
@@ -444,7 +482,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
         Center(
           child: TextButton(
-            onPressed: () => null,
+            onPressed: () => register(context),
             child: Container(
               margin: EdgeInsets.only(top: 25,bottom: 10),
               padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:responsive_ui/responsive_ui.dart';
 import 'package:intl/intl.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/ApiLelang.dart';
 
 import 'DetailLelang.dart';
 import 'ViewAll.dart';
@@ -48,23 +50,41 @@ class AuctionPage extends StatefulWidget {
 
 class _AuctionPageState extends State<AuctionPage> {
   final currencyFormatter = NumberFormat('#,000', 'ID');
+  final img_url = "http://lelang.enricko.com/barang_lelang/";
+  List<Data> newLelang = [];
+  List<Data> historyLelang = [];
+
+  @override
+  void initState() {
+    Api.lelangPage("status=dibuka&time=new").then((value){
+      setState(() {
+        newLelang = value.data!;
+      });
+    });
+    Api.lelangPage("status=ditutup&time=new").then((value){
+      setState(() {
+        historyLelang = value.data!;
+      });
+    });
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Column(
         children: [
           // My Current Action
-          currentBid(context),
+          lelangTerbaru(context),
           SizedBox(
             height: 15,
           ),
-          listLelang(context),
+          riwayatLelang(context),
           // My Current Action
         ],
       ),
     );
   }
-  Widget currentBid(BuildContext context){
+  Widget lelangTerbaru(BuildContext context){
     return Container(
       margin: EdgeInsets.all(10),
       child: Responsive(
@@ -83,7 +103,7 @@ class _AuctionPageState extends State<AuctionPage> {
                     colXL: 9,
                   ),
                   child: const Text(
-                    "Barang yang kamu tawar saat ini",
+                    "Lelang Terbaru",
                     textAlign: TextAlign.start,
                     style: TextStyle(
                       color: Colors.white,
@@ -104,7 +124,7 @@ class _AuctionPageState extends State<AuctionPage> {
                     alignment: Alignment.centerRight,
                     child: TextButton(
                       onPressed: () => Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ViewAll(page: 'Tawaran saat ini'))
+                        MaterialPageRoute(builder: (context) => ViewAll(title: 'Lelang Terbaru',page:1))
                       ),
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),
@@ -143,12 +163,12 @@ class _AuctionPageState extends State<AuctionPage> {
                 alignment: Alignment.center,
                 child: Responsive(
                   children: [
-                    for(var i = 1; i <= 18; i++) 
+                    for(var i = 0; i < newLelang.length; i++) 
                     GestureDetector(
                       onTap: () => 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => DetailLelang(idLelang: 0,))
+                          MaterialPageRoute(builder: (context) => DetailLelang(idLelang: int.parse(newLelang[i].idLelang!),))
                         ),
                       child: Card(
                         color: Color.fromARGB(255, 95, 95, 95),
@@ -162,7 +182,7 @@ class _AuctionPageState extends State<AuctionPage> {
                                   width: 100,
                                   height: 100,
                                   child: Image.network(
-                                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-nIVi5tIOdZXyrCWcc5M76F6QlfLR_VrEIQ&usqp=CAU",
+                                    "${img_url + newLelang[i].barang!.imageBarang!}",
                                     width: 100,
                                     height: 100,
                                     fit: BoxFit.cover,
@@ -183,14 +203,22 @@ class _AuctionPageState extends State<AuctionPage> {
                                   height: 5,
                                 ),
                                 Text(
-                                  capitalizeAllSentence("expensive painting"),
+                                  capitalizeAllSentence("${newLelang[i].barang!.namaBarang!}"),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                   ),
                                 ),
+                                newLelang[i].barang!.hargaAkhir! == "" ?
                                 Text(
-                                  "Rp.${currencyFormatter.format(10293092103)}",
+                                  "Rp.${currencyFormatter.format(int.parse(newLelang[i].barang!.hargaAwal!))}",
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 15,
+                                  ),
+                                ):
+                                Text(
+                                  "Rp.${currencyFormatter.format(int.parse(newLelang[i].barang!.hargaAkhir!))}",
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 15,
@@ -212,7 +240,7 @@ class _AuctionPageState extends State<AuctionPage> {
     );
   }
  
-  Widget listLelang(BuildContext context){
+  Widget riwayatLelang(BuildContext context){
     return Container(
       margin: EdgeInsets.all(10),
       child: Responsive(
@@ -231,7 +259,7 @@ class _AuctionPageState extends State<AuctionPage> {
                     colXL: 9,
                   ),
                   child: const Text(
-                    "List Semua Lelang",
+                    "History Lelang",
                     textAlign: TextAlign.start,
                     style: TextStyle(
                       color: Colors.white,
@@ -253,7 +281,7 @@ class _AuctionPageState extends State<AuctionPage> {
                     child: TextButton(
                       onPressed: () => 
                         Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => ViewAll(page: 'List Lelang'))
+                        MaterialPageRoute(builder: (context) => ViewAll(title: 'History Lelang',page:1))
                       ),
                       child: Container(
                         padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),
@@ -292,12 +320,12 @@ class _AuctionPageState extends State<AuctionPage> {
                 alignment: Alignment.center,
                 child: Responsive(
                   children: [
-                    for(var i = 1; i <= 18; i++) 
+                    for(var i = 0; i < historyLelang.length; i++) 
                     GestureDetector(
                       onTap: () => 
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => DetailLelang(idLelang: 0,))
+                          MaterialPageRoute(builder: (context) => DetailLelang(idLelang: int.parse(historyLelang[i].idLelang!),))
                         ),
                       child: Card(
                         color: Color.fromARGB(255, 95, 95, 95),
@@ -311,7 +339,7 @@ class _AuctionPageState extends State<AuctionPage> {
                                   width: 100,
                                   height: 100,
                                   child: Image.network(
-                                    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-nIVi5tIOdZXyrCWcc5M76F6QlfLR_VrEIQ&usqp=CAU",
+                                    "${img_url + historyLelang[i].barang!.imageBarang!}",
                                     width: 100,
                                     height: 100,
                                     fit: BoxFit.cover,
@@ -332,14 +360,22 @@ class _AuctionPageState extends State<AuctionPage> {
                                   height: 5,
                                 ),
                                 Text(
-                                  capitalizeAllSentence("expensive painting"),
+                                  capitalizeAllSentence("${historyLelang[i].barang!.namaBarang!}"),
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontSize: 16,
                                   ),
                                 ),
+                                historyLelang[i].barang!.hargaAkhir! == "" ?
                                 Text(
-                                  "Rp.${currencyFormatter.format(10293092103)}",
+                                  "Rp.${currencyFormatter.format(int.parse(historyLelang[i].barang!.hargaAwal!))}",
+                                  style: TextStyle(
+                                    color: Colors.white70,
+                                    fontSize: 15,
+                                  ),
+                                ):
+                                Text(
+                                  "Rp.${currencyFormatter.format(int.parse(historyLelang[i].barang!.hargaAkhir!))}",
                                   style: TextStyle(
                                     color: Colors.white70,
                                     fontSize: 15,
@@ -360,5 +396,4 @@ class _AuctionPageState extends State<AuctionPage> {
       ),
     );
   }
- 
 }
