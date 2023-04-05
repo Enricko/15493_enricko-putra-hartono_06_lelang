@@ -18,6 +18,8 @@
 
 3.Install [Flutter SDK](https://docs.flutter.dev/get-started/install?gclid=Cj0KCQjwla-hBhD7ARIsAM9tQKvmwl1gX89fyf9Sly9AY0WokkI5HpkbfyjSjr2N9gZqgneQO6CJrREaAgWpEALw_wcB&gclsrc=aw.ds)
 
+4.Install Extension Flutter & Dart pada VsCode
+
 ### Tata Cara Menginstall Aplikasi flutter Lelang
 
 1.`git clone https://github.com/Enricko/15493_enricko-putra-hartono_06_lelang.git` pada cmd
