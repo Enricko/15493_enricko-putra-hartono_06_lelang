@@ -233,32 +233,6 @@ class _DetailLelangState extends State<DetailLelang> {
                         ),
                       ),
                       TopTable(currencyFormatter: currencyFormatter,idLelang: widget.idLelang,),
-                      // Div(
-                      //   divison: const Division(
-                      //     colXS: 12,
-                      //     colS: 12,
-                      //     colM: 12,
-                      //     colL: 12
-                      //   ),
-                      //   child: Container(
-                      //     margin: const EdgeInsets.symmetric(vertical: 25),
-                      //     child: Column(
-                      //       mainAxisSize: MainAxisSize.max,
-                      //       mainAxisAlignment: MainAxisAlignment.start,
-                      //       crossAxisAlignment: CrossAxisAlignment.start,
-                      //       children: [
-                      //         const Text(
-                      //           "Tawar barang ini dengan harga mu!!",
-                      //           style: TextStyle(
-                      //             color: Colors.white,
-                      //             fontSize: 22,
-                      //             fontWeight: FontWeight.w400
-                      //           ),
-                      //         ),
-                      //       ],
-                      //     ),
-                      //   ),
-                      // ),
                     ],
                   ),
                 ),
@@ -617,7 +591,9 @@ class _BottomNavDetailState extends State<BottomNavDetail> {
       future:history,
       builder: (context,AsyncSnapshot<historyLelang.ApiHistoryLelang> snapshot){
         if (snapshot.hasData) {
-          return BottomNav(context,snapshot.data!.data!);
+          if(snapshot.data!.data!.length != 0){
+            return BottomNav(context,snapshot.data!.data!);
+          }
         }
         return BottomNavNoBid(context);
       },

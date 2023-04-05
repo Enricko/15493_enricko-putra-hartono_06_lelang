@@ -35,6 +35,7 @@ class _LelangIndexState extends State<LelangIndex> {
     }
     lelang = Api.lelang(token!, "status=dibuka");
   }
+  
 
   @override
   void initState() {
@@ -175,6 +176,14 @@ class MyData extends DataTableSource {
   final img_url = "http://lelang.enricko.com/barang_lelang/";
   
   final currencyFormatter = NumberFormat('#,000', 'ID');
+  Future<void> deleteDataLelang(String idLelang)async{
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    Api.deleteLelang(int.parse(idLelang),pref.getString('token')!).then((value){
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => adminMain(page:4)));
+      EasyLoading.showSuccess("${value.message}",dismissOnTap: true);
+      return;
+    });
+  }
   @override
   DataRow? getRow(int index) {
     if(index >= DataList.length){
@@ -193,6 +202,12 @@ class MyData extends DataTableSource {
       DataCell(Text("${lelang.tglDibuka!}")),
       DataCell(Text("${lelang.tglDitutup!}")),
       DataCell(Text("${lelang.barang!.hargaAwal!}")),
+      lelang.user!.id! == "" ? 
+      DataCell(
+        Container(
+          child: Text("Belum ada penawar"),
+        ),
+      ):
       DataCell(Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -225,24 +240,64 @@ class MyData extends DataTableSource {
         ],
       )),
       DataCell(
-        TextButton(
-          onPressed: () => Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (context) => adminMain(page:6,idLelang:int.parse(lelang.idLelang!)))
-          ),
-          child: Container(
-            margin: EdgeInsets.symmetric(vertical: 10),
-            padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),
-            decoration: BoxDecoration(
-              color:Colors.blueAccent ,
-              borderRadius: BorderRadius.circular(25)
-            ),
-            child: Text(
-              "History Lelang",
-              style: TextStyle(
-                color: Colors.white,
+        Row(
+          children: [
+            TextButton(
+              onPressed: () => Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => adminMain(page:8,idLelang:int.parse(lelang.idLelang!)))
+              ),
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),
+                decoration: BoxDecoration(
+                  color:Colors.yellowAccent ,
+                  borderRadius: BorderRadius.circular(25)
+                ),
+                child: Text(
+                  "Update Lelang",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
               ),
             ),
-          ),
+            TextButton(
+              onPressed: () => deleteDataLelang(lelang.idLelang!),
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),
+                decoration: BoxDecoration(
+                  color:Colors.redAccent ,
+                  borderRadius: BorderRadius.circular(25)
+                ),
+                child: Text(
+                  "Delete Lelang",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (context) => adminMain(page:6,idLelang:int.parse(lelang.idLelang!)))
+              ),
+              child: Container(
+                margin: EdgeInsets.symmetric(vertical: 10),
+                padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),
+                decoration: BoxDecoration(
+                  color:Colors.blueAccent ,
+                  borderRadius: BorderRadius.circular(25)
+                ),
+                child: Text(
+                  "History Lelang",
+                  style: TextStyle(
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     ]);

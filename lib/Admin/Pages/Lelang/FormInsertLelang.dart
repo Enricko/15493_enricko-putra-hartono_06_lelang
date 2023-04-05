@@ -1,10 +1,17 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:dotted_border/dotted_border.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
-import 'package:image_picker/image_picker.dart' if(kIsWeb) 'package:image_picker_for_web/image_picker_for_web.dart';
+// import 'dart:html';
+import 'package:image_picker/image_picker.dart';
+import 'package:responsive_ui/responsive_ui.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Home.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Api/Api.dart';
 
 class FormInsertLelang extends StatefulWidget {
   const FormInsertLelang({super.key});
@@ -23,6 +30,62 @@ class _FormInsertLelangState extends State<FormInsertLelang> {
       'value': 'Administrasi',
     },
   ];
+
+  File? pickedImage;
+  Uint8List webImage = Uint8List(8);
+  String? baseImage;
+
+  /// Widget
+  Future<void> _pickImage()async{
+    final ImagePicker imagePicker = ImagePicker();
+    var choosedImage = await imagePicker.pickImage(source: ImageSource.gallery);
+    var f = await choosedImage!.readAsBytes();
+    setState(() {
+      webImage = f;
+      pickedImage = File(choosedImage.path);
+    });
+  }
+
+  TextEditingController controllerNamaBarang = TextEditingController();
+  TextEditingController controllerHargaAwal= TextEditingController();
+  TextEditingController controllerLamaLelang = TextEditingController();
+  TextEditingController controllerDeskripsiBarang = TextEditingController();
+
+  submit(BuildContext context) async{
+    var NamaBarang = controllerNamaBarang.text;
+    var HargaAwal = controllerHargaAwal.text;
+    var LamaLelang = controllerLamaLelang.text;
+    var DeskripsiBarang = controllerDeskripsiBarang.text;
+    SharedPreferences pref = await SharedPreferences.getInstance();
+    var token = pref.getString('token');
+    // print(HargaAwal);
+    try{
+      if(!kIsWeb){
+        List<int> imageBytes = pickedImage!.readAsBytesSync();
+        String baseImage = base64Encode(imageBytes);
+      }
+    }catch(e){
+      print('Error During Converting to Base64');
+    }
+
+    var data = {
+      'nama_barang': NamaBarang,
+      'harga_awal': HargaAwal,
+      'deskripsi_barang': DeskripsiBarang,
+      'lama_lelang': LamaLelang,
+    };
+    Api.insertLelang(data,baseImage,webImage,token!).then((value) async{
+      if(value.message == null){
+        //muncul error
+        await EasyLoading.showError('Something Went Wrong',dismissOnTap: true);
+        return;
+      }
+      await EasyLoading.showSuccess(value.message!,dismissOnTap: true);
+      Navigator.pushReplacement(context, 
+        MaterialPageRoute(builder: (context)=> adminMain(page: 4)));
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -43,11 +106,11 @@ class _FormInsertLelangState extends State<FormInsertLelang> {
               SizedBox(height: 25),
               Container(
                 margin: EdgeInsets.only(bottom: 15),
-                child: Row(
+                child: Responsive(
                   children: [
                     Container(
                       child: GestureDetector(
-                        onTap: null,
+                        onTap: _pickImage,
                         child: DottedBorder(
                           borderType: BorderType.RRect,
                           radius: Radius.circular(12),
@@ -55,25 +118,41 @@ class _FormInsertLelangState extends State<FormInsertLelang> {
                           strokeWidth: 2,
                           color: Colors.white,
                           child: ClipRRect(
-                            child: Image.asset('image/tambahan/image_placeholder.png',width: 200,height: 200, fit: BoxFit.cover)
+                            child: pickedImage == null
+                              ? Image.asset('image/tambahan/image_placeholder.png',width: 200,height: 200, fit: BoxFit.cover)
+                              : kIsWeb ? Image.memory(webImage,fit: BoxFit.cover,width: 200,height: 200,)
+                              : Image.file(pickedImage!,fit: BoxFit.cover,width: 200,height: 200,),
                           ),
                         ),
                       ),
                     ),
-                    Container(
-                      margin: EdgeInsets.only(left: 10,right: 5),
-                      child: Text(
-                        "Select Image Barang Lelang",
-                        style: TextStyle(
-                          fontSize: 20
-                        ),
+                    Div(
+                      divison: Division(
+                        colXS: 12,
+                        colS: 12,
+                        colM: 12,
+                        colL: 8,
+                        colXL: 8,
                       ),
-                    ),
-                    Text(
-                      "#Only Android/Ios/Website only",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.red
+                      child: Responsive(
+                        children: [
+                          Container(
+                            margin: EdgeInsets.only(left: 10,right: 5),
+                            child: Text(
+                              "Select Image Barang Lelang",
+                              style: TextStyle(
+                                fontSize: 20
+                              ),
+                            ),
+                          ),
+                          Text(
+                            "#Only Android/Ios/Website only",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.red
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -83,7 +162,7 @@ class _FormInsertLelangState extends State<FormInsertLelang> {
                 margin: EdgeInsets.symmetric(vertical: 7),
                 child: TextFormField(
                   keyboardType: TextInputType.name,
-                  // controller: controllerName,
+                  controller: controllerNamaBarang,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(15),
@@ -113,7 +192,7 @@ class _FormInsertLelangState extends State<FormInsertLelang> {
                 margin: EdgeInsets.symmetric(vertical: 7),
                 child: TextFormField(
                   keyboardType: TextInputType.number,
-                  // controller: controllerName,
+                  controller: controllerHargaAwal,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(15),
@@ -144,7 +223,7 @@ class _FormInsertLelangState extends State<FormInsertLelang> {
                 child: TextFormField(
                   // keyboardType: TextInputType.number,
                   keyboardType: TextInputType.datetime,
-                  // controller: controllerName,
+                  controller: controllerLamaLelang,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(15),
@@ -174,7 +253,7 @@ class _FormInsertLelangState extends State<FormInsertLelang> {
                 margin: EdgeInsets.symmetric(vertical: 7),
                 child: TextFormField(
                   keyboardType: TextInputType.text,
-                  // controller: controllerName,
+                  controller: controllerDeskripsiBarang,
                   style: TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     contentPadding: const EdgeInsets.all(15),
@@ -203,7 +282,7 @@ class _FormInsertLelangState extends State<FormInsertLelang> {
               Container(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () => null,
+                  onPressed: () => submit(context),
                   child: Container(
                     margin: EdgeInsets.symmetric(vertical: 10),
                     padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),

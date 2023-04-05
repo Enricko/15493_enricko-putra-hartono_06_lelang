@@ -3,6 +3,7 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:responsive_ui/responsive_ui.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/Lelang/FormInsertLelang.dart';
+import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/Lelang/FormUpdateLelang.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/Lelang/HistoryLelang.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/Lelang/LelangTutup.dart';
 import 'package:tampilan_lelang_ukk_jan_29_2023/Admin/Pages/Lelang/lelang.dart';
@@ -64,6 +65,7 @@ class _adminMainState extends State<adminMain> {
       LelangTutup(),
       HistoryLelang(idLelang:widget.idLelang),
       FormInsertLelang(),
+      FormUpdateLelang(idLelang:widget.idLelang),
     ];
     super.initState();
   }

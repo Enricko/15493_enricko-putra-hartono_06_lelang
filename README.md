@@ -1,16 +1,35 @@
-# tampilan_lelang_ukk_jan_29_2023
+# Aplikasi Lelang by Flutter
 
-A new Flutter project.
+### Fitur
+- Registrasi dan login pengguna.
+- Penampilan daftar barang lelang yang sedang berlangsung.
+- Detail barang lelang, termasuk informasi produk, harga awal, dan waktu lelang.
+- Kemampuan untuk menawar harga produk.
+- Kemampuan untuk mengikuti barang lelang.
+- Penampilan riwayat lelang pengguna.
+- Informasi akun pengguna, termasuk riwayat lelang dan barang lelang yang diikuti.
+### Beberapa apps yang harus di install terlebih dahulu
 
-## Getting Started
+1.Install [VsCode](https://code.visualstudio.com/download)
 
-This project is a starting point for a Flutter application.
+2.Install [Java JDK](https://www.oracle.com/id/java/technologies/downloads/)
 
-A few resources to get you started if this is your first Flutter project:
+3.Install [Flutter SDK](https://docs.flutter.dev/get-started/install?gclid=Cj0KCQjwla-hBhD7ARIsAM9tQKvmwl1gX89fyf9Sly9AY0WokkI5HpkbfyjSjr2N9gZqgneQO6CJrREaAgWpEALw_wcB&gclsrc=aw.ds)
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Tata Cara Menginstall Aplikasi flutter Lelang
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1.`git clone https://github.com/Enricko/15493_enricko-putra-hartono_06_lelang.git` pada cmd
+
+2.Buka VsCode dan Open Folder yg baru di clone
+
+3.Setelah buka foldernya jalankan `flutter pub get` pada terminal
+
+4.Tinggal run aja menggunakan `flutter run` pada terminal setelah menjalankan code ini pada terminal anda di beri opsi platform apa yg akan digunakan untuk menjalankan aplikasi ini seperti ini :
+```
+[1]: Windows (windows)
+[2]: Chrome (chrome)
+[3]: Edge (edge)
+```
+anda cukup memencet '1' untuk menjalankan di platform windows dan khusus platform website anda harus menggunakan code ini jika ingin menjalankan platform website
+
+`flutter run --web-renderer html`
