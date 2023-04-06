@@ -78,13 +78,19 @@ class _LoginPageState extends State<LoginPage> {
       "password": password,
       'password_confirmation' : passwordConfirm,
     };
-    print('1');
     Api.register(data).then((value){
       if (value.message! != "Selamat datang") {
-        print('1');
         EasyLoading.showError("Email/NoTelp telah terpakai",dismissOnTap: true);
         return;
       }
+      Pref.userPref(value.data!.id!.toString(), value.data!.name!, value.token!,value.data!.level!);
+      EasyLoading.showSuccess("Welcome ${value.data!.name!}",dismissOnTap: true);
+      if(value.data!.level! == "masyarakat"){
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage()));
+      }else{
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => adminMain()));
+      }
+      return;
     });
 
   }
