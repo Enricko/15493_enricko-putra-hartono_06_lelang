@@ -1,5 +1,10 @@
 # Aplikasi Lelang by Flutter
 
+### Deskripsi
+Aplikasi Lelang by Flutter ini dapat di jalankan di mana aja karena bersifat multi platform. 
+Aplikasi Lelang ini dapat melakukan lelang dimana saja dan kapan saja. 
+
+
 ### Fitur
 - Registrasi dan login pengguna.
 - Penampilan daftar barang lelang yang sedang berlangsung.
@@ -10,7 +15,7 @@
 - Informasi akun pengguna, termasuk riwayat lelang dan barang lelang yang diikuti.
 - Lelang dapat menutup otomatis dalam kurun waktu yang di tentukan 
 
-### Beberapa apps yang harus di install terlebih dahulu
+### Beberapa apps yang harus di install terlebih dahulu. 
 
 1.Install [VsCode](https://code.visualstudio.com/download)
 
