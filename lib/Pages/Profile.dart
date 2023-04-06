@@ -245,52 +245,11 @@ class _ProfilePageState extends State<ProfilePage> {
                 SizedBox(
                   height: 10,
                 ),
-                // MouseRegion(
-                //   cursor: SystemMouseCursors.click,
-                //   child: Stack(
-                //     children: [
-                //       Container(
-                //         margin: EdgeInsets.all(10),
-                //         child: GestureDetector(
-                //           onTap: () => Navigator.push(context,
-                //               MaterialPageRoute(builder: (context) => ViewAll(title: 'Tawaran saat ini'))
-                //           ),
-                //           child: Container(
-                //             padding: EdgeInsets.all(10),
-                //             decoration: BoxDecoration(
-                //               color: Colors.green,
-                //               borderRadius: BorderRadius.circular(10)
-                //             ),
-                //             child: Text(
-                //               'Barang yang kamu tawar saat ini',
-                //             ),
-                //           ),
-                //         ),
-                //       ),
-                //       Positioned(
-                //         top: 1,
-                //         right: 1,
-                //         child: Container(
-                //           width: 30,
-                //           height: 30,
-                //           decoration: BoxDecoration(
-                //             color: Colors.red,
-                //             borderRadius: BorderRadius.circular(50)
-                //           ),
-                //           alignment: Alignment.center,
-                //           child: Text(
-                //             '1',
-                //           ),
-                //         ),
-                //       )
-                //     ],
-                //   ),
-                // ),
                 level == 'masyarakat' ? Container() :
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
                   child: GestureDetector(
-                    onTap: () => Navigator.push(context,
+                    onTap: () => Navigator.pushReplacement(context,
                         MaterialPageRoute(builder: (context) => adminMain())
                     ),
                     child: Container(

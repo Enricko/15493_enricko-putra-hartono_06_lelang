@@ -301,7 +301,6 @@ class _adminMainState extends State<adminMain> {
                 ),
                 onTap: (){
                   Navigator.pop(context);
-                  Navigator.pop(context);
                   Navigator.pushReplacement(context, 
                     MaterialPageRoute(builder: (context) => MyHomePage()));
                 } 

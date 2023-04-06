@@ -78,8 +78,10 @@ class _LoginPageState extends State<LoginPage> {
       "password": password,
       'password_confirmation' : passwordConfirm,
     };
+    print('1');
     Api.register(data).then((value){
       if (value.message! != "Selamat datang") {
+        print('1');
         EasyLoading.showError("Email/NoTelp telah terpakai",dismissOnTap: true);
         return;
       }

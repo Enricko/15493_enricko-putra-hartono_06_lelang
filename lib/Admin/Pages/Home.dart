@@ -259,7 +259,7 @@ class _AdminHomeState extends State<AdminHome> {
               cursor: SystemMouseCursors.click,
               child: GestureDetector(
                 onTap: ()=>
-                  Navigator.pushReplacement(context,
+                  Navigator.push(context,
                     MaterialPageRoute(builder: (context) => LaporanPrint(token: tokens!))
                 ),
                   // MaterialPageRoute(builder: (context) => LaporanPrint())),

@@ -250,7 +250,7 @@ class MyData extends DataTableSource {
                 margin: EdgeInsets.symmetric(vertical: 10),
                 padding: EdgeInsets.symmetric(horizontal:15,vertical: 10),
                 decoration: BoxDecoration(
-                  color:Colors.yellowAccent ,
+                  color:Color.fromARGB(255, 194, 180, 60),
                   borderRadius: BorderRadius.circular(25)
                 ),
                 child: Text(
